@@ -1,0 +1,94 @@
+package consulting.segieth.security.ui;
+
+import static com.vaadin.flow.spring.data.VaadinSpringDataHelpers.toSpringPageRequest;
+
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Optional;
+
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+
+import consulting.segieth.base.ui.ViewToolbar;
+import consulting.segieth.examplefeature.Task;
+import consulting.segieth.security.UserProfile;
+import consulting.segieth.security.ProfileService;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
+
+@Route("/profiles")
+@PageTitle("Profile List")
+@Menu(order = 0, icon = "vaadin:clipboard-check", title = "Profile List")
+@RolesAllowed("SecurityManager")
+class ProfileListView extends VerticalLayout {
+
+    private final ProfileService profileService;
+
+    final TextField description;
+    final DatePicker dueDate;
+    final Button createBtn;
+    final Grid<UserProfile> taskGrid;
+
+    ProfileListView(ProfileService profileService) {
+        this.profileService = profileService;
+
+        description = new TextField();
+        description.setPlaceholder("What do you want to do?");
+        description.setAriaLabel("Task description");
+        description.setMaxLength(Task.DESCRIPTION_MAX_LENGTH);
+        description.setMinWidth("20em");
+
+        dueDate = new DatePicker();
+        dueDate.setPlaceholder("Due date");
+        dueDate.setAriaLabel("Due date");
+
+        createBtn = new Button("Create", event -> createTask());
+        createBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        var dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(getLocale())
+                .withZone(ZoneId.systemDefault());
+        var dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(getLocale());
+
+        taskGrid = new Grid<>();
+        taskGrid.setItems(query -> profileService.list(toSpringPageRequest(query)).stream());
+        taskGrid.addColumn(UserProfile::getDescription).setHeader("Description");
+        /*
+        taskGrid.addColumn(task -> Optional.ofNullable(task.getDueDate()).map(dateFormatter::format).orElse("Never"))
+                .setHeader("Due Date");
+        taskGrid.addColumn(task -> dateTimeFormatter.format(task.getCreationDate())).setHeader("Creation Date");
+        */
+        taskGrid.setEmptyStateText("You have no tasks to complete");
+        taskGrid.setSizeFull();
+        taskGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+
+        setSizeFull();
+        setPadding(false);
+        setSpacing(false);
+        getStyle().setOverflow(Style.Overflow.HIDDEN);
+
+        add(new ViewToolbar("Task List", ViewToolbar.group(description, dueDate, createBtn)));
+        add(taskGrid);
+    }
+
+    private void createTask() {
+    	profileService.createProfile("","","");
+        taskGrid.getDataProvider().refreshAll();
+        description.clear();
+        dueDate.clear();
+        Notification.show("Task added", 3000, Notification.Position.BOTTOM_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
+}
