@@ -1,55 +1,90 @@
 package consulting.segieth.base.ui;
 
-import com.vaadin.flow.component.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
-import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Layout;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
-import com.vaadin.flow.theme.lumo.LumoUtility;
+import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
+import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
+import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
+import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
+import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
+
+import consulting.segieth.security.ProfileService;
+import consulting.segieth.security.SecurityService;
+import consulting.segieth.security.UserProfile;
 
 @Layout
-public final class MainLayout extends AppLayout {
+@AnonymousAllowed
+public class MainLayout extends AppLayout {
 
-    MainLayout() {
+    private SecurityService securityService;
+    private ProfileService profileService;
+
+    public MainLayout(
+    		@Autowired SecurityService securityService) {
+        this.securityService = securityService;
+
+        UserProfile userProfile = securityService.getUserProfile();
+        HorizontalLayout header;
+        H1 salutation = new H1("Moin " + userProfile.getName());
+        salutation.addClassName("logo");
+        header = new HorizontalLayout(salutation);
+        if (securityService.getAuthenticatedUser() != null) {
+            Button logout = new Button("Logout", click ->
+                    securityService.logout());
+            header.add(logout);
+        }
         setPrimarySection(Section.DRAWER);
         addToDrawer(createHeader(), new Scroller(createSideNav()));
+
+        // Other page components omitted.
+
+        addToNavbar(header);
     }
 
-    private Component createHeader() {
-        // TODO Replace with real application logo and name
-        var appLogo = VaadinIcon.CUBES.create();
-        appLogo.setSize("48px");
-        appLogo.setColor("green");
+	private Div createHeader() {
+	    // TODO Replace with real application logo and name
+	    var appLogo = VaadinIcon.CUBES.create();
+	    appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
+	
+	    var appName = new Span("Vaadin Security");
+	    appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
+	
+	    var header = new Div(appLogo, appName);
+	    header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
+	    return header;
+	}
 
-        var appName = new Span("My Application");
-        appName.getStyle().setFontWeight(Style.FontWeight.BOLD);
+	private SideNav createSideNav() {
+	    var nav = new SideNav();
+	    nav.addClassNames(Margin.Horizontal.MEDIUM);
+	    MenuConfiguration.getMenuEntries().forEach(entry -> nav.addItem(createSideNavItem(entry)));
+	    return nav;
+	}
 
-        var header = new VerticalLayout(appLogo, appName);
-        header.setAlignItems(FlexComponent.Alignment.CENTER);
-        return header;
-    }
-
-    private SideNav createSideNav() {
-        var nav = new SideNav();
-        nav.addClassNames(LumoUtility.Margin.Horizontal.MEDIUM);
-        MenuConfiguration.getMenuEntries().forEach(entry -> nav.addItem(createSideNavItem(entry)));
-        return nav;
-    }
-
-    private SideNavItem createSideNavItem(MenuEntry menuEntry) {
-        if (menuEntry.icon() != null) {
-            return new SideNavItem(menuEntry.title(), menuEntry.path(), new Icon(menuEntry.icon()));
-        } else {
-            return new SideNavItem(menuEntry.title(), menuEntry.path());
-        }
-    }
+	private SideNavItem createSideNavItem(MenuEntry menuEntry) {
+	    if (menuEntry.icon() != null) {
+	        return new SideNavItem(menuEntry.title(), menuEntry.path(), new Icon(menuEntry.icon()));
+	    } else {
+	        return new SideNavItem(menuEntry.title(), menuEntry.path());
+	    }
+	}
 }

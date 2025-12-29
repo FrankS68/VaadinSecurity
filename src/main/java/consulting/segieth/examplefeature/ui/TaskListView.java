@@ -1,8 +1,12 @@
 package consulting.segieth.examplefeature.ui;
 
-import consulting.segieth.base.ui.ViewToolbar;
-import consulting.segieth.examplefeature.Task;
-import consulting.segieth.examplefeature.TaskService;
+import static com.vaadin.flow.spring.data.VaadinSpringDataHelpers.toSpringPageRequest;
+
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Optional;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -16,17 +20,17 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.Optional;
+import consulting.segieth.base.ui.ViewToolbar;
+import consulting.segieth.examplefeature.Task;
+import consulting.segieth.examplefeature.TaskService;
+import jakarta.annotation.security.RolesAllowed;
 
-import static com.vaadin.flow.spring.data.VaadinSpringDataHelpers.toSpringPageRequest;
-
-@Route("")
+@Route("tasks")
 @PageTitle("Task List")
 @Menu(order = 0, icon = "vaadin:clipboard-check", title = "Task List")
+@RolesAllowed("TaskManager")
 class TaskListView extends VerticalLayout {
 
     private final TaskService taskService;
