@@ -29,6 +29,8 @@ import jakarta.annotation.PostConstruct;
 public class SecurityService {
 	@Autowired
 	ProfileService profileService;
+	@Autowired
+	RoleService roleService;
 	
 	@Value( "${consulting.segieth.superadmin.email}" )
 	public String email;
@@ -38,6 +40,12 @@ public class SecurityService {
 	@PostConstruct
 	public void init() {
 		System.out.println("Super Admin Role for "+email+" from "+ provider);
+		/*
+    	RoleInspector.allRolesInCode.forEach(role -> {
+    		
+    		roleService.createPermissionRole(role);
+    	});
+		*/
 	}
 
     private static final String LOGOUT_SUCCESS_URL = "/";

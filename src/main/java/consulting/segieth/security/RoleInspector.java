@@ -57,7 +57,7 @@ public class RoleInspector implements CommandLineRunner {
                 e.printStackTrace();
             }
         });
-
+        
         return allRolesInCode;
     }
 }
