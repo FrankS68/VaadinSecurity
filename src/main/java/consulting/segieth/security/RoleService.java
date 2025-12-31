@@ -66,8 +66,8 @@ public class RoleService {
     	return roleRepository.findByName(name);
     };
 
-    public List<Role> findByGroup(Role.RoleType type){
-    	return roleRepository.findByGroup(type);
+    public List<Role> findByGroups(Role.RoleType type){
+    	return roleRepository.findByGroups(type);
     };
 
 }

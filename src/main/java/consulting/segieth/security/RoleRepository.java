@@ -15,5 +15,5 @@ interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificationExec
     // Page performs both a select and a count query.
     Slice<Role> findAllBy(Pageable pageable);
 	List<Role> findByName(String name);
-	List<Role> findByGroup(RoleType type);
+	List<Role> findByGroups(RoleType type);
 }
