@@ -5,7 +5,6 @@ import static com.vaadin.flow.spring.data.VaadinSpringDataHelpers.toSpringPageRe
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Optional;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -22,10 +21,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import consulting.segieth.base.ui.ViewToolbar;
-import consulting.segieth.examplefeature.Task;
-import consulting.segieth.security.UserProfile;
 import consulting.segieth.security.ProfileService;
-import jakarta.annotation.security.PermitAll;
+import consulting.segieth.security.UserProfile;
 import jakarta.annotation.security.RolesAllowed;
 
 @Route("/profiles")
@@ -47,7 +44,7 @@ class ProfileListView extends VerticalLayout {
         description = new TextField();
         description.setPlaceholder("What do you want to do?");
         description.setAriaLabel("Task description");
-        description.setMaxLength(Task.DESCRIPTION_MAX_LENGTH);
+        description.setMaxLength(UserProfile.DESCRIPTION_MAX_LENGTH);
         description.setMinWidth("20em");
 
         dueDate = new DatePicker();

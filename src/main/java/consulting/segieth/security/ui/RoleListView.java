@@ -2,14 +2,8 @@ package consulting.segieth.security.ui;
 
 import static com.vaadin.flow.spring.data.VaadinSpringDataHelpers.toSpringPageRequest;
 
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.Optional;
-
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
@@ -22,12 +16,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import consulting.segieth.base.ui.ViewToolbar;
-import consulting.segieth.examplefeature.Task;
-import consulting.segieth.security.UserProfile;
-import consulting.segieth.security.ProfileService;
 import consulting.segieth.security.Role;
 import consulting.segieth.security.RoleService;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 
 @Route("/roles")
@@ -52,7 +42,7 @@ class RoleListView extends VerticalLayout {
         description = new TextField();
         description.setPlaceholder("What is that role meant for?");
         description.setAriaLabel("Role description");
-        description.setMaxLength(Task.DESCRIPTION_MAX_LENGTH);
+        description.setMaxLength(Role.DESCRIPTION_MAX_LENGTH);
         description.setMinWidth("20em");
 
         createBtn = new Button("Create", event -> createRole());
