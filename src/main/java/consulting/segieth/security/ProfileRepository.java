@@ -13,4 +13,5 @@ interface ProfileRepository extends JpaRepository<UserProfile, Long>, JpaSpecifi
     // Page performs both a select and a count query.
     Slice<UserProfile> findAllBy(Pageable pageable);
     List<UserProfile> findByEmail(String email);
+    List<UserProfile> findByProviderAndEmail(String provider,String email);
 }

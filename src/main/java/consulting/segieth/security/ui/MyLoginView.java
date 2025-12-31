@@ -14,7 +14,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @Route("mylogin")
 @PageTitle("login")
 @AnonymousAllowed
-@Menu(order = 42, icon = "vaadin:clipboard-check", title = "my Logout")
+@Menu(order = 42, icon = "vaadin:clipboard-check", title = "Logout")
 public class MyLoginView extends VerticalLayout {
 
     public MyLoginView() {
@@ -41,7 +41,7 @@ public class MyLoginView extends VerticalLayout {
      	    // Leitet zum Standard-Spring-Security-Endpunkt für Azure weiter
      	    UI.getCurrent().getPage().setLocation("/oauth2/authorization/azure");
      	});
-     	add(loginButton);
+     	add(new Span("Azure braucht für nicht localhost Verbindungen SSL! Da müssen wir nochmal ran."),loginButton);
 
     }
 }

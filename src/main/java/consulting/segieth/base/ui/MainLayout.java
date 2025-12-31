@@ -3,13 +3,10 @@ package consulting.segieth.base.ui;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.applayout.AppLayout;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
@@ -17,69 +14,55 @@ import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
-import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
-import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
-import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 
-import consulting.segieth.security.ProfileService;
 import consulting.segieth.security.SecurityService;
-import consulting.segieth.security.UserProfile;
 
 @Layout
 @AnonymousAllowed
 public class MainLayout extends AppLayout {
 
-    private SecurityService securityService;
-    private ProfileService profileService;
+	   private SecurityService securityService;
 
-    public MainLayout(
-    		@Autowired SecurityService securityService) {
-        this.securityService = securityService;
+	    public MainLayout(
+	    		@Autowired SecurityService securityService) {
+	        this.securityService = securityService;
+        // 1. Navbar Bereich (oben)
+        createHeader();
 
-        UserProfile userProfile = securityService.getUserProfile();
-        HorizontalLayout header;
-        H1 salutation = new H1("Moin " + userProfile.getName());
-        salutation.addClassName("logo");
-        header = new HorizontalLayout(salutation);
-        if (securityService.getAuthenticatedUser() != null) {
-            Button logout = new Button("Logout", click ->
-                    securityService.logout());
-            header.add(logout);
-        }
-        setPrimarySection(Section.DRAWER);
-        addToDrawer(createHeader(), new Scroller(createSideNav()));
-
-        // Other page components omitted.
-
-        addToNavbar(header);
+        // 2. Drawer Bereich (seitlich / mobil einklappbar)
+        createDrawer();
     }
 
-	private Div createHeader() {
-	    // TODO Replace with real application logo and name
-	    var appLogo = VaadinIcon.CUBES.create();
-	    appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
-	
-	    var appName = new Span("Vaadin Security");
-	    appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
-	
-	    var header = new Div(appLogo, appName);
-	    header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
-	    return header;
-	}
+    private void createHeader() {
+        H1 logo = new H1("Moin " + securityService.getUserProfile().getName());
+        logo.addClassNames(
+            LumoUtility.FontSize.LARGE, 
+            LumoUtility.Margin.MEDIUM);
 
+        // Der DrawerToggle ist der "Hamburger"-Button für Mobilgeräte
+        // addToNavbar(true, ...) bedeutet: optimiert für Touch/Mobil
+        addToNavbar(true, new DrawerToggle(), logo);
+    }
+
+    private void createDrawer() {
+        // Die Navigation als SideNav (neue Komponente in Vaadin 24)
+        SideNav nav = createSideNav();
+
+        // Scroller sorgt dafür, dass das Menü scrollbar ist, wenn es zu viele Items sind
+        Scroller scroller = new Scroller(nav);
+        scroller.setClassName(LumoUtility.Padding.SMALL);
+
+        addToDrawer(scroller);
+    }
+    
 	private SideNav createSideNav() {
 	    var nav = new SideNav();
-	    nav.addClassNames(Margin.Horizontal.MEDIUM);
+	    // nav.addClassNames(Margin.Horizontal.MEDIUM);
 	    MenuConfiguration.getMenuEntries().forEach(entry -> nav.addItem(createSideNavItem(entry)));
 	    return nav;
 	}
-
+	
 	private SideNavItem createSideNavItem(MenuEntry menuEntry) {
 	    if (menuEntry.icon() != null) {
 	        return new SideNavItem(menuEntry.title(), menuEntry.path(), new Icon(menuEntry.icon()));

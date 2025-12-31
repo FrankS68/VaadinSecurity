@@ -20,6 +20,8 @@ import jakarta.annotation.security.RolesAllowed;
 public class RoleInspector implements CommandLineRunner {
 
     private final ApplicationContext applicationContext;
+    
+    public static Set<String> allRolesInCode;
 
     public RoleInspector(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
@@ -33,7 +35,7 @@ public class RoleInspector implements CommandLineRunner {
     }
     
     public Set<String> discoverUsedRoles(String basePackage) {
-        Set<String> allRolesInCode = new HashSet<>();
+        allRolesInCode = new HashSet<>();
 
         // 1. Scanner erstellen (false = keine Standardfilter wie @Component)
         ClassPathScanningCandidateComponentProvider scanner = 

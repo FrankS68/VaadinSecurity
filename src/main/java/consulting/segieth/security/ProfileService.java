@@ -46,6 +46,10 @@ public class ProfileService {
     	return profileRepository.findByEmail(email);
     };
 
+    public List<UserProfile> findByProviderAndEmail(String provider,String email){
+    	return profileRepository.findByProviderAndEmail(provider,email);
+    };
+
     @Transactional(readOnly = true)
     public List<UserProfile> list(Pageable pageable) {
         return profileRepository.findAllBy(pageable).toList();
@@ -55,11 +59,11 @@ public class ProfileService {
 		if (email == null) {
 			return new UserProfile("local", "Anonymous");
 		}
-		List<UserProfile> profiles = findByEmail(email);
+		List<UserProfile> profiles = findByProviderAndEmail(provider,email);
 		if (profiles == null || profiles.size() == 0) {
 			return createProfile(provider, email, name);
 		}
-		return null;
+		return profiles.get(0);
 	}
 
 }

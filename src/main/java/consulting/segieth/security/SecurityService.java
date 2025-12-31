@@ -3,7 +3,10 @@ package consulting.segieth.security;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Component;
@@ -18,10 +22,23 @@ import org.springframework.stereotype.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
 
+import jakarta.annotation.PostConstruct;
+
 @Component
+
 public class SecurityService {
 	@Autowired
 	ProfileService profileService;
+	
+	@Value( "${consulting.segieth.superadmin.email}" )
+	public String email;
+	@Value( "${consulting.segieth.superadmin.provider}" )
+	public String provider;
+	
+	@PostConstruct
+	public void init() {
+		System.out.println("Super Admin Role for "+email+" from "+ provider);
+	}
 
     private static final String LOGOUT_SUCCESS_URL = "/";
 
@@ -36,11 +53,10 @@ public class SecurityService {
         if (userProfile == null) {
         	return new UserProfile("local", "anonymous", "Jane Doe");
         }
-        if (userProfile.getName().equals("Frank Segieth")) {
-        	addRoleToCurrentUser("TaskManager");
-        }
-        if (userProfile.getEmail().equals("fse418@gmail.com")) {
-        	addRoleToCurrentUser("SecurityManager");
+        if (userProfile.getEmail().equals(email) && userProfile.getProvider().equals(provider)) {
+        	RoleInspector.allRolesInCode.forEach(role -> {
+            	addRoleToCurrentUser(role);
+        	});
         }
 		return userProfile;
     	
@@ -65,9 +81,16 @@ public class SecurityService {
 
 	private UserProfile getUserProfile(SecurityContext context) {
 		OAuth2User user = getAuthenticatedUser(context);
-		// if (context != null) throw new RuntimeException("hier authorities zuweisen");		
+
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+		String registrationId = "unknown";
+		if (auth instanceof OAuth2AuthenticationToken token) {
+		    registrationId = token.getAuthorizedClientRegistrationId();
+		}
+
 		return profileService.getProfileByEmail(
-				context.getAuthentication().getName(),
+				registrationId,
 				user == null ? null : user.getAttributes().get("email").toString(),
 				user == null ? null : user.getAttributes().get("name").toString());
     }

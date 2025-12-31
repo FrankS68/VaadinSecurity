@@ -39,7 +39,7 @@ class ProfileListView extends VerticalLayout {
     final TextField description;
     final DatePicker dueDate;
     final Button createBtn;
-    final Grid<UserProfile> taskGrid;
+    final Grid<UserProfile> profileGrid;
 
     ProfileListView(ProfileService profileService) {
         this.profileService = profileService;
@@ -61,30 +61,32 @@ class ProfileListView extends VerticalLayout {
                 .withZone(ZoneId.systemDefault());
         var dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(getLocale());
 
-        taskGrid = new Grid<>();
-        taskGrid.setItems(query -> profileService.list(toSpringPageRequest(query)).stream());
-        taskGrid.addColumn(UserProfile::getDescription).setHeader("Description");
+        profileGrid = new Grid<>();
+        profileGrid.setItems(query -> profileService.list(toSpringPageRequest(query)).stream());
+        profileGrid.addColumn(UserProfile::getProvider).setHeader("Provider");
+        profileGrid.addColumn(UserProfile::getEmail).setHeader("Email");
+        profileGrid.addColumn(UserProfile::getName).setHeader("Name");
         /*
         taskGrid.addColumn(task -> Optional.ofNullable(task.getDueDate()).map(dateFormatter::format).orElse("Never"))
                 .setHeader("Due Date");
         taskGrid.addColumn(task -> dateTimeFormatter.format(task.getCreationDate())).setHeader("Creation Date");
         */
-        taskGrid.setEmptyStateText("You have no tasks to complete");
-        taskGrid.setSizeFull();
-        taskGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        profileGrid.setEmptyStateText("You have no tasks to complete");
+        profileGrid.setSizeFull();
+        profileGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         setSizeFull();
         setPadding(false);
         setSpacing(false);
         getStyle().setOverflow(Style.Overflow.HIDDEN);
 
-        add(new ViewToolbar("Task List", ViewToolbar.group(description, dueDate, createBtn)));
-        add(taskGrid);
+        add(new ViewToolbar("Profile List", ViewToolbar.group(description, dueDate, createBtn)));
+        add(profileGrid);
     }
 
     private void createTask() {
     	profileService.createProfile("","","");
-        taskGrid.getDataProvider().refreshAll();
+        profileGrid.getDataProvider().refreshAll();
         description.clear();
         dueDate.clear();
         Notification.show("Task added", 3000, Notification.Position.BOTTOM_END)
